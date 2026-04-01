@@ -1,5 +1,7 @@
 # March Machine Learning Mania 2021 — NCAA Tournament Prediction
 
+![Competition Header](assets/header.png)
+
 ## Overview
 
 The [March Machine Learning Mania 2021](https://www.kaggle.com/competitions/ncaam-march-mania-2021) competition challenged participants to predict the outcomes of every possible matchup in the 2021 NCAA basketball tournament — both men's (NCAAM) and women's (NCAAW) brackets. For each potential game, the model outputs a calibrated win probability for Team 1. The task required predicting all 2,278 possible matchups (not just the 63 actual tournament games), making probability calibration critical.
@@ -39,6 +41,35 @@ Expanded the feature set with detailed box score statistics:
 ### 5. NCAAW Adaptation
 
 Both the Stage 1 and Stage 2 pipelines were adapted for the women's tournament. The women's bracket has different dynamics — higher seed predictability, fewer historical seasons — but the same feature architecture and model pipeline were applied with independently tuned parameters.
+
+## Results
+
+| Stage | Features | Model | Notes |
+|---|---|---|---|
+| Baseline | Massey Ordinals | Logistic transform | POM system selected from 100+ rankings |
+| Stage 1 | 30+ (win records, H2H, seeds) | XGBoost | GroupTimeSeriesSplit CV |
+| **Stage 2** | **Box scores + ordinals + coach tenure** | **XGBoost (enhanced)** | Late-season neutral-court games added |
+
+> Both NCAAM and NCAAW brackets predicted. Metric: Log Loss over 2,278 possible matchups.
+
+## Architecture
+
+```mermaid
+graph LR
+    A["Historical Game Data<br>(2005-2021)"] --> B["Feature Engineering"]
+    B --> B1["Win Records<br>(home/away/neutral)"]
+    B --> B2["Head-to-Head History"]
+    B --> B3["Tournament Seeds"]
+    B --> B4["Massey Ordinals"]
+    B --> B5["Box Score Stats<br>(FG%, rebounds, assists)"]
+    B1 --> C["Matchup Differentials<br>(seed gap, win ratio, H2H)"]
+    B2 --> C
+    B3 --> C
+    B4 --> C
+    B5 --> C
+    C --> D["XGBoost Classifier<br>GroupTimeSeriesSplit CV"]
+    D --> E["Calibrated Win Probabilities"]
+```
 
 ## Repository Structure
 
